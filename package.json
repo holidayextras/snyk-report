@@ -1,0 +1,22 @@
+{
+  "name": "snyk-report",
+  "version": "0.0.1",
+  "description": "Assists in generating human readable snyk reports for CI integration",
+  "scripts": {
+    "start": "node index.js",
+    "test": "./node_modules/.bin/mocha test/unit",
+    "lint": "node_modules/.bin/make-up lib"
+  },
+  "author": "James Hooker <james.hooker@holidayextras.com>",
+  "license": "MIT",
+  "dependencies": {
+    "moment": "2.10.6",
+    "snyk": "1.1.1"
+  },
+  "devDependencies": {
+    "make-up": "5.4.0",
+    "assert": "1.3.0",
+    "mocha": "2.3.3",
+    "sinon": "1.17.2"
+  }
+}
