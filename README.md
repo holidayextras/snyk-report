@@ -17,7 +17,7 @@ An example script has been included, which demonstrates `snyk-report` being run 
 
     'use strict';
 
-    var report = require('./lib/report');
+    var report = require('snyk-report');
 
     var targetDir = process.env.REPO_DIR || __dirname;
     report(targetDir, function(err, output) {
@@ -25,6 +25,9 @@ An example script has been included, which demonstrates `snyk-report` being run 
       console.log(output);
     });
 
+To run the example script use the following command:
+
+    npm run start
 
 ## Running the tests
 
