@@ -27,7 +27,7 @@ An example script has been included, which demonstrates `snyk-report` being run 
 
 To run the example script use the following command:
 
-    npm run start
+    npm start
 
 ## Running the tests
 
