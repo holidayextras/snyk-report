@@ -5,10 +5,10 @@
   "main": "lib/report.js",
   "scripts": {
     "start": "node script/example.js",
-    "lint": "node_modules/.bin/make-up lib script",
+    "lint": "make-up lib script",
     "ci": "npm run lint && npm run coverage",
-    "coverage": "node_modules/.bin/istanbul cover _mocha test/unit/testReport.js && node_modules/.bin/istanbul check-coverage",
-    "test": "node_modules/.bin/mocha test/unit/testReport.js"
+    "coverage": "istanbul cover _mocha test/** && istanbul check-coverage",
+    "test": "mocha test/**"
   },
   "author": "James Hooker <james.hooker@holidayextras.com>",
   "repository": {

@@ -7,9 +7,6 @@ var Report = require('../../lib/report');
 var snyk = require('snyk');
 
 context('Report', function() {
-  describe('_parseSnykResults', function() {
-
-  });
 
   describe('_reportAge', function() {
     var clock;
@@ -27,32 +24,85 @@ context('Report', function() {
   });
 
   describe('_risks', function() {
-    describe('a report has three specified risks', function() {
-      describe('high', function () {
-        it('expect high risk to have colour of red', function() {
-          expect(Report._risks[0].colour).to.equal('red');
-        });
-        it('expect red to be a high risk', function() {
-          expect(Report._risks[0].name).to.equal('high');
-        });
+
+    describe('high', function () {
+
+      it('has a colour of red', function() {
+        expect(Report._risks[0].colour).to.equal('red');
       });
-      describe('medium', function () {
-        it('expect high risk to have colour of red', function() {
-          expect(Report._risks[1].colour).to.equal('yellow');
-        });
-        it('expect red to be a high risk', function() {
-          expect(Report._risks[1].name).to.equal('medium');
-        });
-      });
-      describe('low', function () {
-        it('expect high risk to have colour of red', function() {
-          expect(Report._risks[2].colour).to.equal('green');
-        });
-        it('expect red to be a high risk', function() {
-          expect(Report._risks[2].name).to.equal('low');
-        });
-      });
+
     });
+
+    describe('medium', function () {
+
+      it('has a colour of yellow', function() {
+        expect(Report._risks[1].colour).to.equal('yellow');
+      });
+
+    });
+
+    describe('low', function () {
+
+      it('has a colour of green', function() {
+        expect(Report._risks[2].colour).to.equal('green');
+      });
+
+    });
+
+  });
+
+  describe('_formatSummary()', function() {
+
+    var testData;
+
+    context('with issues', function() {
+
+      beforeEach(function() {
+        testData = {
+           high: 1,
+           medium: 2,
+           low: 3,
+        }
+      });
+
+      it('counts high issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/HIGH\: 1/);
+      });
+
+      it('counts medium issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/MEDIUM\: 2/);
+      });
+
+      it('counts low issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/LOW\: 3/);
+      });
+
+    })
+
+    context('without issues', function() {
+
+      beforeEach(function() {
+        testData = {
+           high: 0,
+           medium: 0,
+           low: 0,
+        }
+      });
+
+      it('counts high issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/HIGH\: 0/);
+      });
+
+      it('counts medium issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/MEDIUM\: 0/);
+      });
+
+      it('counts low issues correctly', function() {
+        expect(Report._formatSummary(testData)).to.match(/LOW\: 0/);
+      });
+
+    })
+
   });
 
   describe.skip('_formatOutput', function() {
@@ -82,55 +132,6 @@ context('Report', function() {
     it('returns the expected data', function() {
       expect(Report._formatOutput(testData)).to.equal('\x1b[1mmodule1\x1b[22m\n_reportLevels\x1b[0m\x1b[1mmodule2\x1b[22m\n_reportLevels\x1b[0m_reportSummary');
     });
-  });
-
-  describe.skip('_reportSummary', function() {
-    it('outputs a summary for report levels with greater than 0 entries', function() {
-      var testData = {
-        report1: {
-          low: [1,2,3],
-          medium: [4,5,6],
-          high: [7,8,9]
-        },
-        report2: {
-          low: [1],
-          medium: [2,3],
-          high: [4,5,6]
-        }
-      };
-
-      expect(Report._reportSummary(testData)).to.equal('\x1b[1mSummary\x1b[22m\n' + Report._colourCodes.low + 'Low: 4\n' + Report._colourCodes.medium + 'Medium: 5\n' + Report._colourCodes.high + 'High: 6\n');
-    });
-
-    it('ignores report levels with 0 entries', function() {
-      var testData = {
-        report1: {
-          low: [1,2,3],
-          medium: [],
-          high: [7,8,9]
-        },
-        report2: {
-          low: [1],
-          medium: [],
-          high: [4,5,6]
-        }
-      };
-
-      expect(Report._reportSummary(testData)).to.equal('\x1b[1mSummary\x1b[22m\n' + Report._colourCodes.low + 'Low: 4\n' + Report._colourCodes.high + 'High: 6\n');
-    });
-
-    it('provides no output if 0 entries exist', function() {
-      var testData = {
-        report1: {
-          low: [],
-          medium: [],
-          high: []
-        }
-      };
-
-      expect(Report._reportSummary(testData)).to.equal('');
-    });
-
   });
 
   describe.skip('_reportLevels', function() {
