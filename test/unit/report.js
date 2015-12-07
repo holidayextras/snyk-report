@@ -8,21 +8,6 @@ var snyk = require('snyk');
 
 context('Report', function() {
 
-  describe('_reportAge', function() {
-    var clock;
-    beforeEach(function() {
-      clock = sinon.useFakeTimers(new Date(2015, 10, 20).getTime());
-    });
-
-    afterEach(function() {
-      clock.restore();
-    });
-
-    it('returns the number of days from the current date', function() {
-      expect(Report._reportAge('2015-11-19 00:00:00 0')).to.equal(1);
-    });
-  });
-
   describe('_risks', function() {
 
     describe('high', function () {
@@ -51,13 +36,115 @@ context('Report', function() {
 
   });
 
+  describe('_groupResults()', function() {
+
+    var grouped;
+
+    context('without any vulnerabilities', function() {
+
+      before(function() {
+        grouped = Report._groupResults({});
+      });
+
+      it('returns an object', function() {
+        expect(grouped).to.be.an('object');
+      });
+
+    });
+
+    context('with vulnerabilities', function() {
+
+      before(function() {
+        sinon.stub(Report, '_reportAge');
+
+        var results = {
+          vulnerabilities: [{
+            id: 1234,
+            severity: 'high',
+            name: 'shoddyjs',
+            title: 'l33t exploit',
+            from: [
+              'currentProject',
+              '3rdPartyLib',
+              'shoddyjs'
+            ],
+            creationTime: '2015-01-01 12:34:56 Z'
+          }]
+        };
+        grouped = Report._groupResults(results);
+      });
+
+      after(function() {
+        Report._reportAge.restore();
+      });
+
+      it('returns an object', function() {
+        expect(grouped).to.be.an('object');
+      });
+
+      it('assigns the vulnerbility to the correct serverity key', function() {
+        expect(grouped.high).to.be.an('array').and.have.length(1);
+      })
+
+      it('calculates the age of vulnerabilities', function() {
+        expect(Report._reportAge).to.have.been.called();
+      })
+
+      describe('vulnerabilities', function() {
+
+        var vulnerability;
+
+        before(function() {
+          vulnerability = grouped.high[0];
+        });
+
+        it('sets the ID', function() {
+          expect(vulnerability.id).to.equal(1234);
+        });
+
+        it('sets the name', function() {
+          expect(vulnerability.name).to.equal('shoddyjs');
+        });
+
+        it('sets the title', function() {
+          expect(vulnerability.title).to.equal('l33t exploit');
+        });
+
+        it('does not include the current package in the path', function() {
+          expect(vulnerability.path[0]).to.equal('3rdPartyLib');
+        })
+
+      });
+
+    });
+
+  });
+
+  describe('_reportAge()', function() {
+
+    var clock;
+
+    before(function() {
+      clock = sinon.useFakeTimers(new Date(2015, 10, 20).getTime());
+    });
+
+    after(function() {
+      clock.restore();
+    });
+
+    it('returns the number of days from the current date', function() {
+      expect(Report._reportAge('2015-11-19 00:00:00 0')).to.equal(1);
+    });
+
+  });
+
   describe('_createSummary()', function() {
 
     var summary;
 
     context('with issues', function() {
 
-      beforeEach(function() {
+      before(function() {
         var grouped = {
           high: [
            {},
@@ -91,7 +178,7 @@ context('Report', function() {
 
     context('without issues', function() {
 
-      beforeEach(function() {
+      before(function() {
         summary = Report._createSummary({});
       });
 
@@ -117,7 +204,7 @@ context('Report', function() {
 
     context('with issues', function() {
 
-      beforeEach(function() {
+      before(function() {
         testData = {
            high: 1,
            medium: 2,
@@ -141,7 +228,7 @@ context('Report', function() {
 
     context('without issues', function() {
 
-      beforeEach(function() {
+      before(function() {
         testData = {
            high: 0,
            medium: 0,
