@@ -138,6 +138,93 @@ context('Report', function() {
 
   });
 
+  describe('_formatVulns()', function() {
+
+    var formatted;
+
+    context('without any vulnerabilities', function() {
+
+      before(function() {
+        formatted = Report._formatVulns({});
+      });
+
+      it('returns an empty string', function() {
+        expect(formatted).to.equal('');
+      });
+
+    });
+
+    context('with vulnerabilities', function() {
+
+      before(function() {
+        sinon.stub(Report, '_formatVuln');
+
+        var grouped = {
+          high: [{}]
+        };
+        formatted = Report._formatVulns(grouped);
+      });
+
+      after(function() {
+        Report._formatVuln.restore();
+      });
+
+      it('returns a string', function() {
+        expect(formatted).to.be.a('string');
+      });
+
+      it('formats the vulnerability', function() {
+        expect(Report._formatVuln).to.have.been.called();
+      });
+
+    });
+
+  });
+
+  describe('_formatVuln()', function() {
+
+    var formatted;
+
+    before(function() {
+      var risk = {
+        name: 'high',
+        colour: 'red'
+      };
+      var vuln = {
+        id: 1234,
+        name: 'pwnedjs',
+        title: 'privilaged command execution',
+        path: [
+          '3rdPartyJs',
+          'sshServerJs'
+        ],
+        age: 10
+      };
+      formatted = Report._formatVuln(risk, vuln);
+    });
+
+    it('outputs the risk severity in upper case', function() {
+      expect(formatted).to.match(/HIGH\:/);
+    });
+
+    it('outputs the name and title together', function() {
+      expect(formatted).to.match(/pwnedjs - privilaged command execution/);
+    });
+    
+    it('shows the module hierarchy with arrows', function() {
+      expect(formatted).to.match(/3rdPartyJs -> sshServerJs/);
+    });
+
+    it('outputs the age in days', function() {
+      expect(formatted).to.match(/10 days old/);
+    });
+
+    it('outputs a link to the synk site', function() {
+      expect(formatted).to.match(/https\:\/\/app\.snyk\.io\/vuln\/1234/);
+    });
+
+  });
+
   describe('_createSummary()', function() {
 
     var summary;
