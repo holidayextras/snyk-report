@@ -1,6 +1,6 @@
 {
   "name": "snyk-report",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Assists in generating human readable snyk reports for CI integration",
   "main": "lib/report.js",
   "scripts": {

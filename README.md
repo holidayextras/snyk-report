@@ -28,7 +28,9 @@ To run the example script use the following command:
 
 ## Running the tests
 
-Tests are a WIP - but will be included.
+To run all the unit tests use:
+
+    npm test
 
 ## Linting
 
