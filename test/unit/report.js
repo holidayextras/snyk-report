@@ -1,35 +1,154 @@
+'use strict';
+
 var expect = require('chai')
   .use(require('sinon-chai'))
   .use(require('dirty-chai'))
   .expect;
 var sinon = require('sinon');
-var Report = require('../../lib/report');
+var sinonStubPromise = require('sinon-stub-promise');
+sinonStubPromise(sinon);
+var report = require('../../lib/report');
 var snyk = require('snyk');
 
 context('Report', function() {
 
+  describe('exported', function() {
+
+    it('is a function', function() {
+      expect(report).to.be.a('function');
+    });
+
+    context('without a callback', function() {
+
+      it('throws an error', function() {
+        expect(function() {
+          report('fakeTargetPath');
+        }).to.throw('No callback given');
+      });
+
+    });
+
+    context('with a invalid callback', function() {
+
+      it('throws an error', function() {
+        expect(function() {
+          report('fakeTargetPath', 'dang!');
+        }).to.throw('callback must be a function');
+      });
+
+    });
+
+    context('with a callback', function() {
+
+      var sandbox = sinon.sandbox.create();
+      var stubbedPromise;
+
+      before(function() {
+        stubbedPromise = sandbox.stub(snyk, 'test').returnsPromise();
+        sandbox.stub(report, '_groupResults');
+        sandbox.stub(report, '_formatVulns');
+        sandbox.stub(report, '_createSummary');
+        sandbox.stub(report, '_formatSummary');
+      });
+
+      after(function() {
+        sandbox.restore();
+      });
+
+      context('when snyk fails', function() {
+
+        var testCallback;
+
+        before(function() {
+          testCallback = sinon.stub();
+          stubbedPromise.rejects(Error('sad face'));
+          report('fakeTargetPath', testCallback);
+        });
+
+        it('run the snyk test', function() {
+          expect(snyk.test).to.have.been.called();
+        });
+
+        it('runs the provided callback', function() {
+          expect(testCallback).to.have.been.called();
+        });
+
+        it('sends the error to the callback', function() {
+          expect(testCallback).to.have.been.calledWith(Error('sad face'));
+        });
+
+      });
+
+      context('when snyk succeeds', function() {
+
+        var testCallback;
+
+        before(function() {
+          testCallback = sinon.stub();
+          var results = {
+            vulnerabilities: []
+          };
+          stubbedPromise.resolves(results);
+          report('fakeTargetPath', testCallback);
+        });
+
+        it('run the snyk test', function() {
+          expect(snyk.test).to.have.been.called();
+        });
+
+        it('groups the results', function() {
+          expect(report._groupResults).to.have.been.called();
+        });
+
+        it('formats the vulnerabilities', function() {
+          expect(report._formatVulns).to.have.been.called();
+        });
+
+        it('creates a summary', function() {
+          expect(report._createSummary).to.have.been.called();
+        });
+
+        it('formats the summary', function() {
+          expect(report._formatSummary).to.have.been.called();
+        });
+
+        it('runs the provided callback', function() {
+          expect(testCallback).to.have.been.called();
+        });
+
+        it('sends the text and summary to the callback', function() {
+          var keys = Object.keys(testCallback.firstCall.args[1]);
+          expect(keys).to.deep.equal(['text', 'summary']);
+        });
+
+      });
+
+    });
+
+  });
+
   describe('_risks', function() {
 
-    describe('high', function () {
+    describe('high', function() {
 
       it('has a colour of red', function() {
-        expect(Report._risks[0].colour).to.equal('red');
+        expect(report._risks[0].colour).to.equal('red');
       });
 
     });
 
-    describe('medium', function () {
+    describe('medium', function() {
 
       it('has a colour of yellow', function() {
-        expect(Report._risks[1].colour).to.equal('yellow');
+        expect(report._risks[1].colour).to.equal('yellow');
       });
 
     });
 
-    describe('low', function () {
+    describe('low', function() {
 
       it('has a colour of green', function() {
-        expect(Report._risks[2].colour).to.equal('green');
+        expect(report._risks[2].colour).to.equal('green');
       });
 
     });
@@ -43,7 +162,7 @@ context('Report', function() {
     context('without any vulnerabilities', function() {
 
       before(function() {
-        grouped = Report._groupResults({});
+        grouped = report._groupResults({});
       });
 
       it('returns an object', function() {
@@ -55,7 +174,7 @@ context('Report', function() {
     context('with vulnerabilities', function() {
 
       before(function() {
-        sinon.stub(Report, '_reportAge');
+        sinon.stub(report, '_reportAge');
 
         var results = {
           vulnerabilities: [{
@@ -71,11 +190,11 @@ context('Report', function() {
             creationTime: '2015-01-01 12:34:56 Z'
           }]
         };
-        grouped = Report._groupResults(results);
+        grouped = report._groupResults(results);
       });
 
       after(function() {
-        Report._reportAge.restore();
+        report._reportAge.restore();
       });
 
       it('returns an object', function() {
@@ -84,11 +203,11 @@ context('Report', function() {
 
       it('assigns the vulnerbility to the correct serverity key', function() {
         expect(grouped.high).to.be.an('array').and.have.length(1);
-      })
+      });
 
       it('calculates the age of vulnerabilities', function() {
-        expect(Report._reportAge).to.have.been.called();
-      })
+        expect(report._reportAge).to.have.been.called();
+      });
 
       describe('vulnerabilities', function() {
 
@@ -112,7 +231,7 @@ context('Report', function() {
 
         it('does not include the current package in the path', function() {
           expect(vulnerability.path[0]).to.equal('3rdPartyLib');
-        })
+        });
 
       });
 
@@ -133,7 +252,7 @@ context('Report', function() {
     });
 
     it('returns the number of days from the current date', function() {
-      expect(Report._reportAge('2015-11-19 00:00:00 0')).to.equal(1);
+      expect(report._reportAge('2015-11-19 00:00:00 0')).to.equal(1);
     });
 
   });
@@ -145,7 +264,7 @@ context('Report', function() {
     context('without any vulnerabilities', function() {
 
       before(function() {
-        formatted = Report._formatVulns({});
+        formatted = report._formatVulns({});
       });
 
       it('returns an empty string', function() {
@@ -157,16 +276,16 @@ context('Report', function() {
     context('with vulnerabilities', function() {
 
       before(function() {
-        sinon.stub(Report, '_formatVuln');
+        sinon.stub(report, '_formatVuln');
 
         var grouped = {
           high: [{}]
         };
-        formatted = Report._formatVulns(grouped);
+        formatted = report._formatVulns(grouped);
       });
 
       after(function() {
-        Report._formatVuln.restore();
+        report._formatVuln.restore();
       });
 
       it('returns a string', function() {
@@ -174,7 +293,7 @@ context('Report', function() {
       });
 
       it('formats the vulnerability', function() {
-        expect(Report._formatVuln).to.have.been.called();
+        expect(report._formatVuln).to.have.been.called();
       });
 
     });
@@ -200,7 +319,7 @@ context('Report', function() {
         ],
         age: 10
       };
-      formatted = Report._formatVuln(risk, vuln);
+      formatted = report._formatVuln(risk, vuln);
     });
 
     it('outputs the risk severity in upper case', function() {
@@ -210,7 +329,7 @@ context('Report', function() {
     it('outputs the name and title together', function() {
       expect(formatted).to.match(/pwnedjs - privilaged command execution/);
     });
-    
+
     it('shows the module hierarchy with arrows', function() {
       expect(formatted).to.match(/3rdPartyJs -> sshServerJs/);
     });
@@ -246,40 +365,40 @@ context('Report', function() {
             {}
           ]
         };
-        summary = Report._createSummary(grouped);
+        summary = report._createSummary(grouped);
       });
 
       it('counts high issues correctly', function() {
         expect(summary.high).to.equal(3);
-      })
+      });
 
       it('counts medium issues correctly', function() {
         expect(summary.medium).to.equal(2);
-      })
+      });
 
       it('counts high issues correctly', function() {
         expect(summary.low).to.equal(1);
-      })
+      });
 
     });
 
     context('without issues', function() {
 
       before(function() {
-        summary = Report._createSummary({});
+        summary = report._createSummary({});
       });
 
       it('counts high issues correctly', function() {
         expect(summary.high).to.equal(0);
-      })
+      });
 
       it('counts medium issues correctly', function() {
         expect(summary.medium).to.equal(0);
-      })
+      });
 
       it('counts high issues correctly', function() {
         expect(summary.low).to.equal(0);
-      })
+      });
 
     });
 
@@ -293,49 +412,49 @@ context('Report', function() {
 
       before(function() {
         testData = {
-           high: 1,
-           medium: 2,
-           low: 3,
-        }
+          high: 1,
+          medium: 2,
+          low: 3
+        };
       });
 
       it('formats high issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/HIGH\: 1/);
+        expect(report._formatSummary(testData)).to.match(/HIGH\: 1/);
       });
 
       it('formats medium issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/MEDIUM\: 2/);
+        expect(report._formatSummary(testData)).to.match(/MEDIUM\: 2/);
       });
 
       it('formats low issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/LOW\: 3/);
+        expect(report._formatSummary(testData)).to.match(/LOW\: 3/);
       });
 
-    })
+    });
 
     context('without issues', function() {
 
       before(function() {
         testData = {
-           high: 0,
-           medium: 0,
-           low: 0,
-        }
+          high: 0,
+          medium: 0,
+          low: 0
+        };
       });
 
       it('counts high issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/HIGH\: 0/);
+        expect(report._formatSummary(testData)).to.match(/HIGH\: 0/);
       });
 
       it('counts medium issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/MEDIUM\: 0/);
+        expect(report._formatSummary(testData)).to.match(/MEDIUM\: 0/);
       });
 
       it('counts low issues correctly', function() {
-        expect(Report._formatSummary(testData)).to.match(/LOW\: 0/);
+        expect(report._formatSummary(testData)).to.match(/LOW\: 0/);
       });
 
-    })
+    });
 
   });
 

@@ -5,7 +5,7 @@
   "main": "lib/report.js",
   "scripts": {
     "start": "node script/example.js",
-    "lint": "make-up lib script",
+    "lint": "make-up lib script test",
     "ci": "npm run lint && npm run coverage",
     "coverage": "istanbul cover _mocha test/** && istanbul check-coverage",
     "test": "mocha test/**"
@@ -29,6 +29,7 @@
     "make-up": "5.4.0",
     "mocha": "2.3.3",
     "sinon": "1.17.2",
-    "sinon-chai": "^2.8.0"
+    "sinon-chai": "^2.8.0",
+    "sinon-stub-promise": "^0.1.1"
   }
 }
