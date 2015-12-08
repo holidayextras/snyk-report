@@ -188,6 +188,18 @@ context('Report', function() {
               'shoddyjs'
             ],
             creationTime: '2015-01-01 12:34:56 Z'
+          },
+          {
+            id: 5678,
+            severity: 'high',
+            name: 'hackedjs',
+            title: 'buffer overflow',
+            from: [
+              'currentProject',
+              '3rdPartyLib',
+              'hackedjs'
+            ],
+            creationTime: '2015-01-01 12:34:56 Z'
           }]
         };
         grouped = report._groupResults(results);
@@ -202,7 +214,7 @@ context('Report', function() {
       });
 
       it('assigns the vulnerbility to the correct serverity key', function() {
-        expect(grouped.high).to.be.an('array').and.have.length(1);
+        expect(grouped.high).to.be.an('array').and.have.length(2);
       });
 
       it('calculates the age of vulnerabilities', function() {
