@@ -15,14 +15,11 @@ This module can be installed with `npm`.
 
 An example script has been included, which demonstrates `snyk-report` being run against either a directory pointed to by the `REPO_DIR` environment variable, or the current directory if it is not defined.
 
-    'use strict';
-
     var report = require('snyk-report');
-
-    var targetDir = process.env.REPO_DIR || __dirname;
+    var targetDir = process.env.REPO_DIR || '.';
     report(targetDir, function(err, output) {
       if (err) throw new Error(err);
-      console.log(output);
+      console.log(output.text);
     });
 
 To run the example script use the following command:
@@ -31,7 +28,9 @@ To run the example script use the following command:
 
 ## Running the tests
 
-Tests are a WIP - but will be included.
+To run all the unit tests use:
+
+    npm test
 
 ## Linting
 
