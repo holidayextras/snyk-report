@@ -117,8 +117,12 @@ context('Report', function() {
         });
 
         it('sends the text and summary to the callback', function() {
-          var keys = Object.keys(testCallback.firstCall.args[1]);
-          expect(keys).to.deep.equal(['text', 'summary']);
+          expect(testCallback).to.have.been.called.with(
+            null, {
+              'text': sinon.match.string,
+              'summary': sinon.match.string
+            }
+          );
         });
 
       });
@@ -324,7 +328,7 @@ context('Report', function() {
       var vuln = {
         id: 1234,
         name: 'pwnedjs',
-        title: 'privilaged command execution',
+        title: 'privileged command execution',
         path: [
           '3rdPartyJs',
           'sshServerJs'
@@ -339,11 +343,11 @@ context('Report', function() {
     });
 
     it('outputs the name and title together', function() {
-      expect(formatted).to.match(/pwnedjs - privilaged command execution/);
+      expect(formatted).to.match(/pwnedjs - privileged command execution/);
     });
 
     it('shows the module hierarchy with arrows', function() {
-      expect(formatted).to.match(/3rdPartyJs -> sshServerJs/);
+      expect(formatted).to.match(/3rdPartyJs → sshServerJs/);
     });
 
     it('outputs the age in days', function() {
