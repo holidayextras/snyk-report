@@ -74,7 +74,10 @@ context('Report', function() {
         });
 
         it('sends the error to the callback', function() {
-          expect(testCallback).to.have.been.calledWith(Error('sad face'));
+          expect(testCallback).to.have.been.calledWith(null, {
+            text: 'sad face',
+            summary: { }
+          });
         });
 
       });
