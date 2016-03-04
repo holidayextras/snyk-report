@@ -1,6 +1,6 @@
 {
   "name": "snyk-report",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Assists in generating human readable snyk reports for CI integration",
   "main": "lib/report.js",
   "scripts": {
@@ -18,8 +18,8 @@
   "license": "MIT",
   "dependencies": {
     "colours": "^0.6.0-2",
-    "moment": "2.10.6",
-    "snyk": "1.6.1"
+    "moment": "^2.10.6",
+    "snyk": "^1.11.3"
   },
   "devDependencies": {
     "assert": "1.3.0",
