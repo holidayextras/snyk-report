@@ -195,8 +195,7 @@ context('Report', function() {
               'shoddyjs'
             ],
             creationTime: '2015-01-01 12:34:56 Z'
-          },
-          {
+          }, {
             id: 5678,
             severity: 'high',
             name: 'hackedjs',
