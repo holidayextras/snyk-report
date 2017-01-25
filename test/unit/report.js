@@ -18,6 +18,41 @@ context('Report', function() {
       expect(report).to.be.a('function');
     });
 
+    context('without a environment token', function() {
+
+      var token;
+
+      before(function() {
+        token = snyk.api;
+        report('NOTEXISTS', function() {});
+      });
+
+      it('does not change the token', function() {
+        expect(snyk.api).to.equal(token);
+      });
+
+    });
+
+    context('with a environment token', function() {
+
+      var token;
+
+      before(function() {
+        token = snyk.api;
+        process.env.SNYK_API_TOKEN = 'TESTTOKEN';
+        report('NOTEXISTS', function() {});
+      });
+
+      after(function() {
+        snyk.api = token;
+      });
+
+      it('sets the token from the environment', function() {
+        expect(snyk.api).to.equal('TESTTOKEN');
+      });
+
+    });
+
     context('without a callback', function() {
 
       it('throws an error', function() {

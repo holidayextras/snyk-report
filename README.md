@@ -13,6 +13,10 @@ This module can be installed with `npm`.
 
     npm install snyk-report --save-dev
 
+Before this module can be used authentication with the Snyk API will need to be setup. For more details see [Snyk CLI Authentication](https://snyk.io/docs/using-snyk#authentication).
+
+Alternatively this module allows the environment variable `SNYK_API_TOKEN` to be set containing the correct authentication token.
+
 An example script has been included, which demonstrates `snyk-report` being run against either a directory pointed to by the `REPO_DIR` environment variable, or the current directory if it is not defined.
 
     var report = require('snyk-report');
